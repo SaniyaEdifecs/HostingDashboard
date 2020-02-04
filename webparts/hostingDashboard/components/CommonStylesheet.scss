@@ -1,0 +1,44 @@
+// Variables
+$theme-color: #ed5124;
+$white: #ffffff;
+$black: #000000;
+$blue: #687bf7;
+$lightblue: #72d9ef;
+$cyan: #79e7eb;
+$grey: #d8d8d8;
+
+.ms-Icon {
+  color: #00ad56;
+  &.red {
+    color: #da3b01;
+  }
+  &.amber {
+    color: #ffaa44;
+  }
+}
+a.autoRefresh {
+  color: $theme-color;
+  float: right;
+  font-weight: 500;
+  font-size: 16px;
+  .ms-Icon {
+    color: $theme-color;
+  }
+}
+td.MuiTableCell-body,
+th.MuiTableCell-head {
+  font-size: 13px;
+  padding: 10px 8px;
+  //   line-height: 18px;
+  min-height: 40px;
+}
+
+.margin16 {
+  margin: 16px 0;
+}
+a {
+  text-decoration: none;
+  &:hover {
+    text-decoration: none !important;
+  }
+}
