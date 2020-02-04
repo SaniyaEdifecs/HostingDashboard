@@ -7,7 +7,6 @@ import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import './CommonStylesheet.scss';
 import { MessageBar } from 'office-ui-fabric-react';
-import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import Moment from 'react-moment';
 import { sp } from '@pnp/sp/presets/all';
 
