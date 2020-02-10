@@ -5,7 +5,7 @@ $black: #000000;
 $blue: #687bf7;
 $lightblue: #72d9ef;
 $cyan: #79e7eb;
-$grey: #d8d8d8;
+$grey: #e4dfdf;
 
 .ms-Icon {
   color: #00ad56;
@@ -27,18 +27,29 @@ a.autoRefresh {
 }
 td.MuiTableCell-body,
 th.MuiTableCell-head {
-  font-size: 13px;
+  font-size: 12px;
   padding: 10px 8px;
   //   line-height: 18px;
   min-height: 40px;
+  &:nth-child(6){
+    width:200px;
+  }
 }
-
+th.MuiTableCell-head {
+  background-color: $grey;
+  font-weight: 600;
+}
 .margin16 {
-  margin: 16px 0;
+  margin: 16px 0 !important;
 }
 a {
   text-decoration: none;
   &:hover {
     text-decoration: none !important;
   }
+}
+.msSpinner {
+  height: 200px;
+  display: flex;
+  justify-content: center;
 }

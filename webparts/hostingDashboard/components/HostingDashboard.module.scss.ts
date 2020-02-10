@@ -1,16 +1,16 @@
 /* tslint:disable */
 require("./HostingDashboard.module.css");
 const styles = {
-  hostingDashboard: 'hostingDashboard_6d0ff9d0',
-  container: 'container_6d0ff9d0',
-  row: 'row_6d0ff9d0',
-  column: 'column_6d0ff9d0',
-  'ms-Grid': 'ms-Grid_6d0ff9d0',
-  title: 'title_6d0ff9d0',
-  subTitle: 'subTitle_6d0ff9d0',
-  description: 'description_6d0ff9d0',
-  button: 'button_6d0ff9d0',
-  label: 'label_6d0ff9d0'
+  hostingDashboard: 'hostingDashboard_f720ab4c',
+  container: 'container_f720ab4c',
+  row: 'row_f720ab4c',
+  column: 'column_f720ab4c',
+  'ms-Grid': 'ms-Grid_f720ab4c',
+  title: 'title_f720ab4c',
+  subTitle: 'subTitle_f720ab4c',
+  description: 'description_f720ab4c',
+  button: 'button_f720ab4c',
+  label: 'label_f720ab4c'
 };
 
 export default styles;

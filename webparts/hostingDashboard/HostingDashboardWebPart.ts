@@ -12,14 +12,7 @@ import HostingDashboard from './components/HostingDashboard';
 import { IHostingDashboardProps } from './components/IHostingDashboardProps';
 import { sp } from "@pnp/sp";
 
-export interface IHostingDashboardWebPartProps {
-  description: string;
-  context: string;
-}
-
-export default class HostingDashboardWebPart extends BaseClientSideWebPart<IHostingDashboardWebPartProps> {
-  public context: any;
-  
+export default class HostingDashboardWebPart extends BaseClientSideWebPart<IHostingDashboardProps> {
   public onInit(): Promise<void> {
     return super.onInit().then(_ => {
       sp.setup({
@@ -27,13 +20,12 @@ export default class HostingDashboardWebPart extends BaseClientSideWebPart<IHost
         
       });
     });
-
+ 
   }
   public render(): void {
     const element: React.ReactElement<IHostingDashboardProps > = React.createElement(
       HostingDashboard,
       {
-        description: this.properties.description,
         context: this.context,
       }
     );

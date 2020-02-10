@@ -7,8 +7,8 @@ import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import './CommonStylesheet.scss';
 import { MessageBar } from 'office-ui-fabric-react';
-import Moment from 'react-moment';
 import { sp } from '@pnp/sp/presets/all';
+import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 const useStyles1 = makeStyles((theme: Theme) =>
   createStyles({
@@ -47,33 +47,32 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
     onChangePage(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
   };
 
-  return (
-    <div className={classes.root}>
-      <IconButton
-        onClick={handleFirstPageButtonClick}
-        disabled={page === 0}
-        aria-label="first page"
-      >
-        {theme.direction === 'rtl' ? <LastPage /> : <FirstPage />}
-      </IconButton>
-      <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
-        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-      </IconButton>
-      <IconButton
-        onClick={handleNextButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="next page"
-      >
-        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-      </IconButton>
-      <IconButton
-        onClick={handleLastPageButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="last page"
-      >
-        {theme.direction === 'rtl' ? <FirstPage /> : <LastPage />}
-      </IconButton>
-    </div>
+  return (<div className={classes.root}>
+    <IconButton
+      onClick={handleFirstPageButtonClick}
+      disabled={page === 0}
+      aria-label="first page"
+    >
+      {theme.direction === 'rtl' ? <LastPage /> : <FirstPage />}
+    </IconButton>
+    <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
+      {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+    </IconButton>
+    <IconButton
+      onClick={handleNextButtonClick}
+      disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+      aria-label="next page"
+    >
+      {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+    </IconButton>
+    <IconButton
+      onClick={handleLastPageButtonClick}
+      disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+      aria-label="last page"
+    >
+      {theme.direction === 'rtl' ? <FirstPage /> : <LastPage />}
+    </IconButton>
+  </div>
   );
 };
 
@@ -84,7 +83,8 @@ const TableComponent = ({ props }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, listData.length - page * rowsPerPage);
-  const priotity = { 1: "Critical", 2: "Urgent", 3: "High", 4: "Medium", 5: "Low", 6: "Project" };
+  const priority = { 1: "Critical", 2: "Urgent", 3: "High", 4: "Medium", 5: "Low", 6: "Project" };
+  const matchedKeywords = ["PSHST Provision", "PSHST Build"];
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
@@ -97,93 +97,105 @@ const TableComponent = ({ props }) => {
     setPage(0);
   };
 
+  // const filterCond = ('UserId eq null' + ' or ' + items.map(item => `UserId eq ${item.id}`).join(' or '));
   const getListData = () => {
-
-    sp.web.lists.getByTitle('Footprints-PSSupport').items.top(100).get().then((response: any) => {
+    sp.web.lists.getByTitle('Footprints-PSSupport').items.filter("substringof('PSHST Build', mrTITLE)").get().then((response: any) => {
       if (response) {
-        console.log("hereggg",response);
+        console.log("here======", response);
         setListData(response);
-        console.log("listData===", listData);
       }
-
-    })
+    }, (err) => {
+      console.log("error", err.message.value);
+    });
   };
 
   const autoReload = (e) => {
     e.preventDefault();
-    console.log("clicked");
     getListData();
   };
 
-  console.log("outside listData===", listData);
+  const formatDate = (string) => {
+    const DATE_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric' };
+    return (new Date(string)).toLocaleDateString('en-US', DATE_OPTIONS);
+  }
+  const removeEscape = (string) => {
+    const encodedText =  string;
+    const normalText = encodedText.replace('&#58;', ':');
+    console.log(normalText);
+    return normalText;
+  }
+
   useEffect(() => {
     getListData();
   }, []);
 
+  const columns: any[] = ["ESD#", "Priority", "Requestor", "Customer", "Env", "Summary", "Related ITIO#", "Reason", "Status", "Target Delivey Date", "Go Live Date"]
   return (
-    <Grid container spacing={2}>
-
+    <Grid container >
       <Grid item xs={12}>
         <Link href="#" className="autoRefresh" type="button" onClick={autoReload}>
           <i className="ms-Icon ms-Icon--Refresh" aria-hidden="true"></i>&nbsp; Refresh
       </Link >
       </Grid>
       <Grid item xs={12}>
-        <MessageBar>Updated: {new Date()} </MessageBar>
+        {/* <MessageBar></MessageBar> */}
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} className="margin16">
         <TableContainer component={Paper}>
           <Table aria-label="custom pagination table">
             <TableHead>
-              <TableCell>S.No</TableCell>
-              <TableCell>ESD# </TableCell>
-              <TableCell>Priority</TableCell>
-              {/* <TableCell>Requestor Name</TableCell>
-              <TableCell>Customer Name</TableCell> */}
-              {/* <TableCell >Summary </TableCell> */}
-              {/* <TableCell>Environment </TableCell> */}
-              <TableCell>Related ITIO# </TableCell>
-              <TableCell>Reason </TableCell>
-              <TableCell>Status </TableCell>
-              <TableCell>Target Delivey Date </TableCell>
-              <TableCell>Go Live Date </TableCell>
+              <TableRow>
+                {columns.map(column => (
+                  <TableCell >
+                    {column}
+                  </TableCell>
+                ))}
+              </TableRow>
+
             </TableHead>
-            <TableBody>
+            {listData.length > 0 ? <TableBody>
+
               {(rowsPerPage > 0
                 ? listData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 : listData
               ).map((listitem, index) => (
                 <TableRow key={index}>
-                  <TableCell component="th" scope="row">
-                    {index}
-                  </TableCell>
                   <TableCell align="left"> <a href={"http://esd/MRcgi/MRlogin.pl?DIRECTLOGIN=1&DOWHAT=JUMPTOTICKET&MR=" + listitem.mrID + "&PROJECTID=25"} target="_blank">{listitem.mrID}</a>  </TableCell>
                   <TableCell align="left">
-                    <i className={"ms-Icon ms-Icon--FullCircleMask " + (listitem.priority === 1 || listitem.priority === 2 ? 'red' : listitem.priority === 4 || listitem.priority === 3 ? 'amber' : '')} aria-hidden="true"></i>
-                    {/* &nbsp;{priotity[listitem.priority]} */}
+                    <i className={"ms-Icon ms-Icon--FullCircleMask " + (priority[listitem.mrPRIORITY] === "Critical" || priority[listitem.mrPRIORITY] === "Urgent" ? 'red' : priority[listitem.mrPRIORITY] === "High" || priority[listitem.mrPRIORITY] === "Medium" ? 'amber' : '')} aria-hidden="true"></i>
+                    &nbsp;{priority[listitem.mrPRIORITY]}
                   </TableCell>
-                  {/* <TableCell align="left">{listitem.rname}</TableCell>
-                  <TableCell align="left">{listitem.cname}</TableCell> */}
-                  {/* <TableCell align="left">{listitem.mrDESCRIPTION}</TableCell> */}
-                  {/* <TableCell align="left">{listitem.env}</TableCell> */}
+                  <TableCell align="left">{listitem.rname}</TableCell>
+                  <TableCell align="left">{listitem.cname}</TableCell>
+                  <TableCell align="left">{listitem.env}</TableCell>
+                  <TableCell align="left">{removeEscape(listitem.mrTITLE)}</TableCell>
                   <TableCell align="left"><a href={"http://esd/MRcgi/MRlogin.pl?DIRECTLOGIN=1&DOWHAT=JUMPTOTICKET&MR=" + listitem.Related__bITIO__b__3 + "&PROJECTID=25"} target="_blank">{listitem.Related__bITIO__b__3}</a></TableCell>
-                  <TableCell align="left">{listitem.Reason != null ? listitem.Reason.split('__b').join(' ') : ""}</TableCell>
-                  <TableCell align="left">{listitem.mrSTATUS != null ? listitem.mrSTATUS.split('__b').join(' ') : ""}</TableCell>
-                  <TableCell align="left"><Moment format="DD/MM/YYYY">{listitem.Target__bDelivery__bDate} </Moment></TableCell>
-                  <TableCell align="left"> <Moment format="DD/MM/YYYY">{listitem.Go__bLive__bDate} </Moment></TableCell>
+                  <TableCell align="left">{listitem.Reason ? listitem.Reason.split('__b').join(' ') : ""}</TableCell>
+                  <TableCell align="left">{listitem.mrSTATUS ? listitem.mrSTATUS.split('__b').join(' ') : ""}</TableCell>
+                  <TableCell align="left">{listitem.Target__bDelivery__bDate ? formatDate(listitem.Target__bDelivery__bDate) : ""}</TableCell>
+                  <TableCell align="left">{listitem.Go__bLive__bDate ? formatDate(listitem.Go__bLive__bDate) : ""} </TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={12} />
+                  <TableCell colSpan={11} />
                 </TableRow>
               )}
-            </TableBody>
+            </TableBody> : <TableBody> <TableRow>
+              <TableCell colSpan={11} >
+                <div className="msSpinner">
+                  <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
+                </div>
+              </TableCell>
+            </TableRow>
+              </TableBody>
+            }
+
             <TableFooter>
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                  colSpan={12}
+                  colSpan={11}
                   count={listData.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
@@ -200,7 +212,7 @@ const TableComponent = ({ props }) => {
           </Table>
         </TableContainer>
       </Grid>
-    </Grid>
+    </Grid >
   );
 };
 export default TableComponent;
