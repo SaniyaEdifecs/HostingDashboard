@@ -7,49 +7,87 @@ $lightblue: #72d9ef;
 $cyan: #79e7eb;
 $grey: #e4dfdf;
 
-.ms-Icon {
-  color: #00ad56;
-  &.red {
-    color: #da3b01;
-  }
-  &.amber {
-    color: #ffaa44;
-  }
-}
-a.autoRefresh {
-  color: $theme-color;
-  float: right;
-  font-weight: 500;
-  font-size: 16px;
+table {
   .ms-Icon {
+    color: #00ad56;
+    &.red {
+      color: #da3b01;
+    }
+    &.amber {
+      color: #ffaa44;
+    }
+  }
+}
+.disabledLink{
+  a.autoRefresh{
+    color: $grey;
+    pointer-events: none;
+    .ms-Icon {
+      color: $grey;
+    }
+  }
+}
+  a.autoRefresh {
     color: $theme-color;
+    float: right;
+    font-weight: 500;
+    font-size: 16px;
+    .ms-Icon {
+      color: $theme-color;
+    }
   }
-}
-td.MuiTableCell-body,
-th.MuiTableCell-head {
-  font-size: 12px;
-  padding: 10px 8px;
-  //   line-height: 18px;
-  min-height: 40px;
-  &:nth-child(6){
-    width:200px;
+  td.MuiTableCell-body,
+  th.MuiTableCell-head {
+    font-size: 12px;
+    padding: 7px 5px;
+    //   line-height: 18px;
+    min-height: 40px;
+    &:nth-child(6),
+    &:nth-child(9) {
+      width: 200px;
+      box-sizing: border-box;
+    }
   }
-}
-th.MuiTableCell-head {
-  background-color: $grey;
-  font-weight: 600;
-}
-.margin16 {
-  margin: 16px 0 !important;
-}
-a {
-  text-decoration: none;
-  &:hover {
-    text-decoration: none !important;
+  th.MuiTableCell-head {
+    background-color: $grey;
+    font-weight: 600;
   }
-}
-.msSpinner {
-  height: 200px;
-  display: flex;
-  justify-content: center;
-}
+  .margin16 {
+    margin: 16px 0 !important;
+  }
+  a {
+    text-decoration: none;
+    &:hover {
+      text-decoration: none !important;
+    }
+  }
+  .msSpinner {
+    height: 200px;
+    display: flex;
+    justify-content: center;
+  }
+  .descLink{
+    color: $theme-color;
+    cursor: pointer;
+  }
+  .MuiDialog-container{
+    h6{
+      font-size: 16px;
+      font-weight: 600;
+    }
+    p{
+      font-size: 14px;
+    }
+    button{
+      color: $theme-color;
+      .MuiButton-label{
+        color: $theme-color;
+      }
+    }
+  }
+
+  .MuiDialog-container{ 
+    h6{
+      max-width: 93%;
+    }
+  }

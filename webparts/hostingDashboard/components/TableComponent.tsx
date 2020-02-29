@@ -7,8 +7,10 @@ import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import './CommonStylesheet.scss';
 import { MessageBar } from 'office-ui-fabric-react';
+import DialogBox from './DialogBox';
 import { sp } from '@pnp/sp/presets/all';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 
 const useStyles1 = makeStyles((theme: Theme) =>
   createStyles({
@@ -81,10 +83,11 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
 const TableComponent = ({ props }) => {
   const [listData, setListData] = useState([]);
   const [page, setPage] = useState(0);
+  const [disableRefresh, setDisableRefresh] = useState(false);
+  const [dialogData, setDialogData] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, listData.length - page * rowsPerPage);
   const priority = { 1: "Critical", 2: "Urgent", 3: "High", 4: "Medium", 5: "Low", 6: "Project" };
-  const matchedKeywords = ["PSHST Provision", "PSHST Build"];
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
@@ -97,11 +100,10 @@ const TableComponent = ({ props }) => {
     setPage(0);
   };
 
-  // const filterCond = ('UserId eq null' + ' or ' + items.map(item => `UserId eq ${item.id}`).join(' or '));
   const getListData = () => {
     sp.web.lists.getByTitle('Footprints-PSSupport').items.filter("substringof('PSHST Build', mrTITLE)").get().then((response: any) => {
       if (response) {
-        console.log("here======", response);
+        setDisableRefresh(false);
         setListData(response);
       }
     }, (err) => {
@@ -111,38 +113,46 @@ const TableComponent = ({ props }) => {
 
   const autoReload = (e) => {
     e.preventDefault();
+    setDisableRefresh(true);
     getListData();
   };
-
   const formatDate = (string) => {
-    const DATE_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric' };
+    const DATE_OPTIONS = { year: 'numeric', month: 'numeric', day: 'numeric' };
     return (new Date(string)).toLocaleDateString('en-US', DATE_OPTIONS);
-  }
-  const removeEscape = (string) => {
-    const encodedText =  string;
-    const normalText = encodedText.replace('&#58;', ':');
-    console.log(normalText);
-    return normalText;
-  }
+  };
 
+  useEffect(() => { getListData(); }, []);
+
+  const openDialogBox = (item) => {
+    // e.preventDefault();
+    setDialogData(item);
+    setOpenDialog(true);
+  };
+  const handleChildClick = (value: boolean) => {
+    setOpenDialog(value);
+  }
   useEffect(() => {
-    getListData();
-  }, []);
+  }, [openDialog]);
 
-  const columns: any[] = ["ESD#", "Priority", "Requestor", "Customer", "Env", "Summary", "Related ITIO#", "Reason", "Status", "Target Delivey Date", "Go Live Date"]
+  const columns: any[] = ["ESD#", "Priority", "Requestor", "Customer", "Env", "Title", "Description", "ITIO#", "Reason", "Status", "Delivey Date", "Go Live Date"];
   return (
     <Grid container >
-      <Grid item xs={12}>
-        <Link href="#" className="autoRefresh" type="button" onClick={autoReload}>
-          <i className="ms-Icon ms-Icon--Refresh" aria-hidden="true"></i>&nbsp; Refresh
-      </Link >
+      <Grid item xs={12} >
+        <div className={disableRefresh ? 'disabledLink' : ""}>
+          <Link href="#" className="autoRefresh" type="button" onClick={autoReload}>
+            <i className="ms-Icon ms-Icon--Refresh" aria-hidden="true"></i>&nbsp; Refresh
+          </Link >
+        </div>
       </Grid>
       <Grid item xs={12}>
-        {/* <MessageBar></MessageBar> */}
+        <MessageBar className="margin16">
+          {"Last Updated at: " + `${new Date().toLocaleString()}`}
+        </MessageBar>
+        <DialogBox props={openDialog} content={dialogData} onChildClick={handleChildClick} />
       </Grid>
       <Grid item xs={12} className="margin16">
         <TableContainer component={Paper}>
-          <Table aria-label="custom pagination table">
+          <Table aria-label="custom pagination table" >
             <TableHead>
               <TableRow>
                 {columns.map(column => (
@@ -160,27 +170,25 @@ const TableComponent = ({ props }) => {
                 : listData
               ).map((listitem, index) => (
                 <TableRow key={index}>
-                  <TableCell align="left"> <a href={"http://esd/MRcgi/MRlogin.pl?DIRECTLOGIN=1&DOWHAT=JUMPTOTICKET&MR=" + listitem.mrID + "&PROJECTID=25"} target="_blank">{listitem.mrID}</a>  </TableCell>
+                  {/* <a href={"http://esd/MRcgi/MRlogin.pl?DIRECTLOGIN=1&DOWHAT=JUMPTOTICKET&MR=" + listitem.mrID + "&PROJECTID=25"} target="_blank"></a> */}
+                  <TableCell align="left"> {listitem.mrID} </TableCell>
                   <TableCell align="left">
                     <i className={"ms-Icon ms-Icon--FullCircleMask " + (priority[listitem.mrPRIORITY] === "Critical" || priority[listitem.mrPRIORITY] === "Urgent" ? 'red' : priority[listitem.mrPRIORITY] === "High" || priority[listitem.mrPRIORITY] === "Medium" ? 'amber' : '')} aria-hidden="true"></i>
                     &nbsp;{priority[listitem.mrPRIORITY]}
                   </TableCell>
-                  <TableCell align="left">{listitem.rname}</TableCell>
-                  <TableCell align="left">{listitem.cname}</TableCell>
-                  <TableCell align="left">{listitem.env}</TableCell>
-                  <TableCell align="left">{removeEscape(listitem.mrTITLE)}</TableCell>
-                  <TableCell align="left"><a href={"http://esd/MRcgi/MRlogin.pl?DIRECTLOGIN=1&DOWHAT=JUMPTOTICKET&MR=" + listitem.Related__bITIO__b__3 + "&PROJECTID=25"} target="_blank">{listitem.Related__bITIO__b__3}</a></TableCell>
+                  <TableCell align="left">{listitem.Requester__bName}</TableCell>
+                  <TableCell align="left">{listitem.Customer__bName}</TableCell>
+                  <TableCell align="left">{listitem.Environment}</TableCell>
+                  <TableCell align="left">{ReactHtmlParser(listitem.mrTITLE)}</TableCell>
+                  <TableCell ><a className="descLink" onClick={() => openDialogBox(listitem)}>View <br /> Description</a></TableCell>
+                  <TableCell align="left">{listitem.Related__bITIO__b__3}</TableCell>
                   <TableCell align="left">{listitem.Reason ? listitem.Reason.split('__b').join(' ') : ""}</TableCell>
                   <TableCell align="left">{listitem.mrSTATUS ? listitem.mrSTATUS.split('__b').join(' ') : ""}</TableCell>
                   <TableCell align="left">{listitem.Target__bDelivery__bDate ? formatDate(listitem.Target__bDelivery__bDate) : ""}</TableCell>
                   <TableCell align="left">{listitem.Go__bLive__bDate ? formatDate(listitem.Go__bLive__bDate) : ""} </TableCell>
                 </TableRow>
               ))}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={11} />
-                </TableRow>
-              )}
+
             </TableBody> : <TableBody> <TableRow>
               <TableCell colSpan={11} >
                 <div className="msSpinner">
